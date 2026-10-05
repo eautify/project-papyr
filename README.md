@@ -1,75 +1,49 @@
-# React + TypeScript + Vite
+# Papyr
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Papyr is a personal book catalog and reading journal. Its first release is designed around private libraries, edition-aware book records, reading progress and history, and custom collections.
 
-Currently, two official plugins are available:
+## Current state
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The repository currently contains the responsive library dashboard foundation. Its visible books and reading totals are illustrative UI data; they are not a connected account or persisted catalog. Authentication, the database schema and policies, and Open Library search will be added on top of this screen.
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React, TypeScript, and Vite
+- Supabase for authentication and private catalog data
+- Open Library for book discovery and bibliographic lookup, through a service boundary
 
-## Expanding the ESLint configuration
+## Run locally
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```sh
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## Planned architecture
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```text
+React app
+  ├── Auth and private library features
+  ├── Catalog services ────────────────┐
+  ├── Open Library service wrappers    │
+  └── Supabase browser client          │
+          │                            │
+          ▼                            ▼
+     Supabase Auth + Postgres      Supabase Edge Functions
+     private rows protected       validate and normalize
+     with row-level security      Open Library requests
+                                       │
+                                       ▼
+                                  Open Library
 ```
+
+Book works and editions will be separate shared metadata records. User catalog entries, reading records, logs, and collections will be private rows protected by Supabase row-level security. The browser must only receive the Supabase publishable key; service credentials belong in server-side configuration.
+
+## Next implementation foundations
+
+1. Define migrations for works, editions, user books, reading records, logs, and collections, including constraints and row-level security.
+2. Add Supabase session restoration and authentication routes.
+3. Define domain types and service wrappers, then connect the dashboard to the signed-in user's data.
+4. Add Open Library Edge Functions for search, work/edition lookup, and discovery.
+
+See [SKILL.md](SKILL.md) for the product and technical blueprint.

@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 # AI assistant
-SKILL.md
+# SKILL.md
 
 # env
 .env
